@@ -1,8 +1,6 @@
 #Adapted from https://github.com/FakeNewsChallenge/fnc-1/blob/master/scorer.py
 #Original credit - @bgalbraith
 
-LABELS = ['related', 'unrelated']
-
 def score_submission(gold_labels, test_labels):
     score = 0.0
 
@@ -13,25 +11,6 @@ def score_submission(gold_labels, test_labels):
 
 
     return score
-
-
-def print_confusion_matrix(cm):
-    lines = []
-    header = "|{:^11}|{:^11}|{:^11}|{:^11}|{:^11}|".format('', *LABELS)
-    line_len = len(header)
-    lines.append("-"*line_len)
-    lines.append(header)
-    lines.append("-"*line_len)
-
-    hit = 0
-    total = 0
-    for i, row in enumerate(cm):
-        hit += row[i]
-        total += sum(row)
-        lines.append("|{:^11}|{:^11}|{:^11}|{:^11}|{:^11}|".format(LABELS[i],
-                                                                   *row))
-        lines.append("-"*line_len)
-    print('\n'.join(lines))
 
 
 def report_score(actual,predicted):
@@ -46,4 +25,4 @@ if __name__ == "__main__":
     actual = [0,0,0,0,1,1,0,3,3]
     predicted = [0,0,0,0,1,1,2,3,3]
 
-    report_score([LABELS[e] for e in actual],[LABELS[e] for e in predicted])
+    report_score([e for e in actual],[e for e in predicted])
