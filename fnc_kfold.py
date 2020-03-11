@@ -21,13 +21,23 @@ def generate_features(ids,d, name):
     # a la fin on aura trois tableau et pour chaque index , ex : 0 ça donne : y[0]  = 'disagree'  headlines[0] = 'titre' bodies[0]= ' un body'
 
 
-    #X_overlap = gen_or_load_feats(word_overlap_features, headlines, bodies, "features/overlap."+name+".npy") # pour chaque feature il crée un tableau X_feature[0] = 'valeur'
-    #X_refuting = gen_or_load_feats(refuting_features, headlines, bodies, "features/refuting."+name+".npy")
-    X_polarity = gen_or_load_feats(polarity_features, headlines, bodies, "features/polarity."+name+".npy")
+    X_overlap = gen_or_load_feats(word_overlap_features, headlines, bodies, "features/overlap."+name+".npy") # pour chaque feature il crée un tableau X_feature[0] = 'valeur'
+    X_refuting = gen_or_load_feats(refuting_features, headlines, bodies, "features/refuting."+name+".npy")
+  #  X_polarity = gen_or_load_feats(polarity_features, headlines, bodies, "features/polarity."+name+".npy")
   #  X_hand = gen_or_load_feats(hand_features, headlines, bodies, "features/hand."+name+".npy")
 
-    X = np.c_[X_polarity]#,X_polarity,X_hand]#, X_polarity, X_refuting]#, X_overlap] #tableau des features
+    X = np.c_[X_refuting,X_overlap]#,X_polarity,X_hand]#, X_polarity, X_refuting]#, X_overlap] #tableau des features
     return X,y
+
+
+def deleteEmptyBodyIds(ids, dataSet):
+    clean_ids = []
+    for id in ids:
+        cleanTitle = dataSet.trainData[int(id)]['title'].encode('ascii', 'ignore').decode('ascii')
+        cleanText = dataSet.trainData[int(id)]['text'].encode('ascii', 'ignore').decode('ascii')
+        if( cleanText and cleanTitle):
+            clean_ids.append(id)
+    return clean_ids
 
 if __name__ == "__main__":
 
@@ -35,7 +45,9 @@ if __name__ == "__main__":
     dataSet = DataSet(name="train") #  lire la dataset de TRAINING
     training_testing_ids, optimisation_ids = generate_splited_data_ids(dataSet, 0.9)
 
-    folds_ids = kfold_split(training_testing_ids, 10)
+    clean_training_testing_ids  = deleteEmptyBodyIds(training_testing_ids, dataSet)
+
+    folds_ids = kfold_split(clean_training_testing_ids, 10)
 
     # Load/Precompute all features now
     X_optim,y_optim = generate_features(optimisation_ids, dataSet, "holdout") # ici il génére les differents features, une feature veut dire une propriété pour décider la classification apres
@@ -53,14 +65,18 @@ if __name__ == "__main__":
 
         X_train = dict(Xs)
         del X_train[index]
-        trains = np.vstack(tuple([x for x in X_train] ))
+        plat = [X_train[i] for i in X_train]
+        t  = tuple(plat)
+        trains = np.vstack(t)
 
 
         y_train = dict(ys)
         del y_train[index]
 
+        trainsy = np.hstack(tuple([y_train[i] for i in y_train]))
+
         clf = GradientBoostingClassifier()
-        clf.fit(trains, y_train)
+        clf.fit(trains, trainsy)
 
         X_test = Xs[index]
         y_test = ys[index]

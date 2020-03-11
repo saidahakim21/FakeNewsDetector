@@ -45,9 +45,12 @@ def word_overlap_features(headlines, bodies): # ici il calcule la moyenne de l'i
         clean_body = clean(body)
         clean_headline = get_tokenized_lemmas(clean_headline)
         clean_body = get_tokenized_lemmas(clean_body)
-        features = [
+        try:
+            features = [
             len(set(clean_headline).intersection(clean_body)) / float(len(set(clean_headline).union(clean_body)))]
-        X.append(features)
+            X.append(features)
+        except:
+         print("An exception occurred")
     return X
 
 
