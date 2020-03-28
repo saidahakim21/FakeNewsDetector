@@ -1,7 +1,8 @@
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
 
-from feature_engineering import refuting_features, polarity_features, hand_features, gen_or_load_feats
+from feature_engineering import refuting_features, polarity_features, hand_features, gen_or_load_feats, \
+    grammar_dependencies_count
 from feature_engineering import word_overlap_features
 from utils.dataset import DataSet
 from utils.generate_test_splits import generate_splited_data_ids, kfold_split
@@ -21,12 +22,12 @@ def generate_features(ids,d, name):
     # a la fin on aura trois tableau et pour chaque index , ex : 0 ça donne : y[0]  = 'disagree'  headlines[0] = 'titre' bodies[0]= ' un body'
 
 
-    X_overlap = gen_or_load_feats(word_overlap_features, headlines, bodies, "features/overlap."+name+".npy") # pour chaque feature il crée un tableau X_feature[0] = 'valeur'
-    X_refuting = gen_or_load_feats(refuting_features, headlines, bodies, "features/refuting."+name+".npy")
-  #  X_polarity = gen_or_load_feats(polarity_features, headlines, bodies, "features/polarity."+name+".npy")
-  #  X_hand = gen_or_load_feats(hand_features, headlines, bodies, "features/hand."+name+".npy")
-
-    X = np.c_[X_refuting,X_overlap]#,X_polarity,X_hand]#, X_polarity, X_refuting]#, X_overlap] #tableau des features
+    #X_overlap = gen_or_load_feats(word_overlap_features ,headlines, bodies, "features/overlap."+name+".npy") # pour chaque feature il crée un tableau X_feature[0] = 'valeur'
+    #X_refuting = gen_or_load_feats(refuting_features, headlines, bodies, "features/refuting."+name+".npy")
+    #  X_polarity = gen_or_load_feats(polarity_features, headlines, bodies, "features/polarity."+name+".npy")
+    #X_hand = gen_or_load_feats(hand_features, headlines, bodies, "features/hand."+name+".npy")
+    X_grammar_dependencies = gen_or_load_feats(grammar_dependencies_count,headlines,bodies,"features/grammar"+name+".npy")
+    X = np.c_[X_grammar_dependencies]#X_refuting,X_overlap]#,X_polarity,X_hand]#, X_polarity, X_refuting]#, X_overlap] #tableau des features
     return X,y
 
 

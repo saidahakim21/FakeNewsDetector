@@ -2,6 +2,9 @@ from csv import DictReader
 import sys
 import csv
 
+from tqdm import tqdm
+
+
 class DataSet():
     def __init__(self, name="", path="fnc-1"):
         self.path = path
@@ -15,10 +18,10 @@ class DataSet():
         self.trainData = self.read(name+".csv")
 
         #make the ID an integer value
-        for s in self.trainData:
+        for s in tqdm(self.trainData):
             s['id'] = int(s['id'])
 
-        for s in self.trainData:
+        for s in tqdm(self.trainData):
             s['label'] = int(s['label'])
 
 

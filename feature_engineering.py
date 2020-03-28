@@ -1,15 +1,16 @@
 import os
 import re
-import nltk # natural language processing toolkit
-import numpy as np #large multi dimentional and array/ matrices
-from sklearn import feature_extraction  #machine learning library
-from tqdm import tqdm # progress 'ta9adoum in arabic' lol, instantly show loops progress
+import nltk  # natural language processing toolkit
+import numpy as np  # large multi dimentional and array/ matrices
+import spacy
+from nltk import collections
+from sklearn import feature_extraction  # machine learning library
+from tqdm import tqdm  # progress 'ta9adoum in arabic' lol, instantly show loops progress
+
+_wnl = nltk.WordNetLemmatizer()  # Lemmatizer converts a word to original form
 
 
-_wnl = nltk.WordNetLemmatizer() #Lemmatizer converts a word to original form
-
-
-def normalize_word(w): #original form in lower case, example dogs => dog
+def normalize_word(w):  # original form in lower case, example dogs => dog
     return _wnl.lemmatize(w).lower()
 
 
@@ -27,18 +28,17 @@ def remove_stopwords(l):
     return [w for w in l if w not in feature_extraction.text.ENGLISH_STOP_WORDS]
 
 
-def gen_or_load_feats(feat_fn, headlines, bodies, feature_file):
+def gen_or_load_feats(feat_fn ,headlines, bodies, feature_file):
     if not os.path.isfile(feature_file):
         feats = feat_fn(headlines, bodies)
-        np.save(feature_file, feats)
+        np.save(feature_file,feats)
 
-    return np.load(feature_file)
-
-
+    return np.load(feature_file,allow_pickle=True)
 
 
-def word_overlap_features(headlines, bodies): # ici il calcule la moyenne de l'intersection des mots entre headline,body  sur l'union des mots du headline,body
-                                            #il retourne
+def word_overlap_features(headlines,
+                          bodies):  # ici il calcule la moyenne de l'intersection des mots entre headline,body  sur l'union des mots du headline,body
+    # il retourne
     X = []
     for i, (headline, body) in tqdm(enumerate(zip(headlines, bodies))):
         clean_headline = clean(headline)
@@ -47,10 +47,10 @@ def word_overlap_features(headlines, bodies): # ici il calcule la moyenne de l'i
         clean_body = get_tokenized_lemmas(clean_body)
         try:
             features = [
-            len(set(clean_headline).intersection(clean_body)) / float(len(set(clean_headline).union(clean_body)))]
+                len(set(clean_headline).intersection(clean_body)) / float(len(set(clean_headline).union(clean_body)))]
             X.append(features)
         except:
-         print("An exception occurred")
+            print("An exception occurred")
     return X
 
 
@@ -100,6 +100,7 @@ def polarity_features(headlines, bodies):
     def calculate_polarity(text):
         tokens = get_tokenized_lemmas(text)
         return sum([t in _refuting_words for t in tokens]) % 2
+
     X = []
     for i, (headline, body) in tqdm(enumerate(zip(headlines, bodies))):
         clean_headline = clean(headline)
@@ -159,7 +160,6 @@ def append_ngrams(features, text_headline, text_body, size):
 
 
 def hand_features(headlines, bodies):
-
     def binary_co_occurence(headline, body):
         # Count how many times a token in the title
         # appears in the body text.
@@ -208,5 +208,41 @@ def hand_features(headlines, bodies):
                  + binary_co_occurence_stops(headline, body)
                  + count_grams(headline, body))
 
-
     return X
+
+
+def grammar_dependencies_count(headlines, bodies):
+    parser = spacy.load('en')
+
+    grammar_counts = {}
+    print("starting parser")
+    #tagsDict = {k: v for v, k in enumerate(parser.pipe_labels['parser'])}
+    tagsDict =  parser.pipe_labels['parser']
+
+    for i, doc in enumerate(parser.pipe(bodies, batch_size=1000, n_threads=4)):
+        counts = collections.Counter()
+        for w in doc:
+            counts[w.dep_] += 1
+        ssum = sum(counts.values())
+        for k, v in counts.items():
+            counts[k] = (counts[k] / ssum)
+        grammar_counts[i] = counts
+    rv = list(range(len(bodies)))
+    print("starting lists")
+    for i,b in tqdm(enumerate(bodies)):
+        try:
+            rv[i] = []
+            for k in tagsDict :
+                if(grammar_counts[i].keys().__contains__(k)):
+                    rv[i].append(grammar_counts[i][k])
+                else:
+                    rv[i].append(0)
+        except Exception as e:
+            # Ocassionally the way Spacey processes unusual characters (bullet points, em dashes) will cause the lookup based on the original characters to fail.
+            # In that case, just set to None.
+            print("Error in GrammarTransformer, setting to None")
+            # print(text)
+            rv[i] = {}
+            continue
+
+    return rv
