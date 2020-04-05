@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
 
 from feature_engineering import refuting_features, polarity_features, hand_features, gen_or_load_feats, \
-    grammar_dependencies_count
+    grammar_dependencies_count,tfIdf_features,tfIdf_parameteres,gen_or_load_feats_tfidf
 from feature_engineering import word_overlap_features
 from utils.dataset import DataSet
 from utils.generate_test_splits import generate_splited_data_ids, kfold_split
@@ -27,7 +27,9 @@ def generate_features(ids,d, name):
     #  X_polarity = gen_or_load_feats(polarity_features, headlines, bodies, "features/polarity."+name+".npy")
     #X_hand = gen_or_load_feats(hand_features, headlines, bodies, "features/hand."+name+".npy")
     X_grammar_dependencies = gen_or_load_feats(grammar_dependencies_count,headlines,bodies,"features/grammar"+name+".npy")
-    X = np.c_[X_grammar_dependencies]#X_refuting,X_overlap]#,X_polarity,X_hand]#, X_polarity, X_refuting]#, X_overlap] #tableau des features
+    X_tf_idf = gen_or_load_feats_tfidf(tfIdf_features, stances, body_entry,bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer, "features/tfidf."+name+".npy")
+    X = np.c_[X_hand, X_polarity, X_refuting, X_overlap,X_tf_idf] #tableau des features
+    X = np.c_[X_grammar_dependencies,X_tf_idf]#X_refuting,X_overlap]#,X_polarity,X_hand]#, X_polarity, X_refuting]#, X_overlap] #tableau des features
     return X,y
 
 
