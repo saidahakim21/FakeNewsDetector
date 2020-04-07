@@ -6,6 +6,10 @@ import spacy
 from nltk import collections
 from sklearn import feature_extraction  # machine learning library
 from tqdm import tqdm  # progress 'ta9adoum in arabic' lol, instantly show loops progress
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 _wnl = nltk.WordNetLemmatizer()  # Lemmatizer converts a word to original form
 
@@ -28,26 +32,21 @@ def remove_stopwords(l):
     return [w for w in l if w not in feature_extraction.text.ENGLISH_STOP_WORDS]
 
 
-def gen_or_load_feats(feat_fn ,headlines, bodies, feature_file):
+def gen_or_load_feats(feat_fn, headlines, bodies, feature_file, bow_vectorizer=None, tfreq_vectorizer=None,
+                      tfidf_vectorizer=None):
     if not os.path.isfile(feature_file):
-        feats = feat_fn(headlines, bodies)
-        np.save(feature_file,feats)
+        if feat_fn.__name__ == tfIdf_features.__name__:
+            feats = feat_fn(headlines, bodies, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
+            np.save(feature_file, feats)
+        else:
+            feats = feat_fn(headlines, bodies)
+            np.save(feature_file, feats)
 
-    return np.load(feature_file,allow_pickle=True)
-
-
-def gen_or_load_feats_tfidf(feat_fn, headlines, bodies, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer, feature_file):
-    
-    if not os.path.isfile(feature_file):
-        feats = feat_fn(headlines, bodies, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
-        np.save(feature_file, feats)
-    
-    return np.load(feature_file)
+    return np.load(feature_file, allow_pickle=True)
 
 
 def word_overlap_features(headlines,
                           bodies):  # ici il calcule la moyenne de l'intersection des mots entre headline,body  sur l'union des mots du headline,body
-    # il retourne
     X = []
     for i, (headline, body) in tqdm(enumerate(zip(headlines, bodies))):
         clean_headline = clean(headline)
@@ -114,9 +113,7 @@ def polarity_features(headlines, bodies):
     for i, (headline, body) in tqdm(enumerate(zip(headlines, bodies))):
         clean_headline = clean(headline)
         clean_body = clean(body)
-        features = []
-        features.append(calculate_polarity(clean_headline))
-        features.append(calculate_polarity(clean_body))
+        features = [calculate_polarity(clean_headline), calculate_polarity(clean_body)]
         X.append(features)
     return np.array(X)
 
@@ -225,8 +222,8 @@ def grammar_dependencies_count(headlines, bodies):
 
     grammar_counts = {}
     print("starting parser")
-    #tagsDict = {k: v for v, k in enumerate(parser.pipe_labels['parser'])}
-    tagsDict =  parser.pipe_labels['parser']
+    # tagsDict = {k: v for v, k in enumerate(parser.pipe_labels['parser'])}
+    tagsDict = parser.pipe_labels['parser']
 
     for i, doc in enumerate(parser.pipe(bodies, batch_size=1000, n_threads=4)):
         counts = collections.Counter()
@@ -238,11 +235,11 @@ def grammar_dependencies_count(headlines, bodies):
         grammar_counts[i] = counts
     rv = list(range(len(bodies)))
     print("starting lists")
-    for i,b in tqdm(enumerate(bodies)):
+    for i, b in tqdm(enumerate(bodies)):
         try:
             rv[i] = []
-            for k in tagsDict :
-                if(grammar_counts[i].keys().__contains__(k)):
+            for k in tagsDict:
+                if grammar_counts[i].keys().__contains__(k):
                     rv[i].append(grammar_counts[i][k])
                 else:
                     rv[i].append(0)
@@ -257,60 +254,46 @@ def grammar_dependencies_count(headlines, bodies):
     return rv
 
 
-
-
-def tfIdf_parameteres(data,lim_unigram):
-    
-    
+def tfIdf_parameteres(heads, bodies, lim_unigram):
     stop_words = [
-    "a", "about", "above", "across", "after", "afterwards", "again", "against", "all", "almost", "alone", "along",
-    "already", "also", "although", "always", "am", "among", "amongst", "amoungst", "amount", "an", "and", "another",
-    "any", "anyhow", "anyone", "anything", "anyway", "anywhere", "are", "around", "as", "at", "back", "be",
-    "became", "because", "become", "becomes", "becoming", "been", "before", "beforehand", "behind", "being",
-    "below", "beside", "besides", "between", "beyond", "bill", "both", "bottom", "but", "by", "call", "can", "co",
-    "con", "could", "cry", "de", "describe", "detail", "do", "done", "down", "due", "during", "each", "eg", "eight",
-    "either", "eleven", "else", "elsewhere", "empty", "enough", "etc", "even", "ever", "every", "everyone",
-    "everything", "everywhere", "except", "few", "fifteen", "fifty", "fill", "find", "fire", "first", "five", "for",
-    "former", "formerly", "forty", "found", "four", "from", "front", "full", "further", "get", "give", "go", "had",
-    "has", "have", "he", "hence", "her", "here", "hereafter", "hereby", "herein", "hereupon", "hers", "herself",
-    "him", "himself", "his", "how", "however", "hundred", "i", "ie", "if", "in", "inc", "indeed", "interest",
-    "into", "is", "it", "its", "itself", "keep", "last", "latter", "latterly", "least", "less", "ltd", "made",
-    "many", "may", "me", "meanwhile", "might", "mill", "mine", "more", "moreover", "most", "mostly", "move", "much",
-    "must", "my", "myself", "name", "namely", "neither", "nevertheless", "next", "nine", "nobody", "now", "nowhere",
-    "of", "off", "often", "on", "once", "one", "only", "onto", "or", "other", "others", "otherwise", "our", "ours",
-    "ourselves", "out", "over", "own", "part", "per", "perhaps", "please", "put", "rather", "re", "same", "see",
-    "serious", "several", "she", "should", "show", "side", "since", "sincere", "six", "sixty", "so", "some",
-    "somehow", "someone", "something", "sometime", "sometimes", "somewhere", "still", "such", "system", "take",
-    "ten", "than", "that", "the", "their", "them", "themselves", "then", "thence", "there", "thereafter", "thereby",
-    "therefore", "therein", "thereupon", "these", "they", "thick", "thin", "third", "this", "those", "though",
-    "three", "through", "throughout", "thru", "thus", "to", "together", "too", "top", "toward", "towards", "twelve",
-    "twenty", "two", "un", "under", "until", "up", "upon", "us", "very", "via", "was", "we", "well", "were", "what",
-    "whatever", "when", "whence", "whenever", "where", "whereafter", "whereas", "whereby", "wherein", "whereupon",
-    "wherever", "whether", "which", "while", "whither", "who", "whoever", "whole", "whom", "whose", "why", "will",
-    "with", "within", "without", "would", "yet", "you", "your", "yours", "yourself", "yourselves"
+        "a", "about", "above", "across", "after", "afterwards", "again", "against", "all", "almost", "alone", "along",
+        "already", "also", "although", "always", "am", "among", "amongst", "amoungst", "amount", "an", "and", "another",
+        "any", "anyhow", "anyone", "anything", "anyway", "anywhere", "are", "around", "as", "at", "back", "be",
+        "became", "because", "become", "becomes", "becoming", "been", "before", "beforehand", "behind", "being",
+        "below", "beside", "besides", "between", "beyond", "bill", "both", "bottom", "but", "by", "call", "can", "co",
+        "con", "could", "cry", "de", "describe", "detail", "do", "done", "down", "due", "during", "each", "eg", "eight",
+        "either", "eleven", "else", "elsewhere", "empty", "enough", "etc", "even", "ever", "every", "everyone",
+        "everything", "everywhere", "except", "few", "fifteen", "fifty", "fill", "find", "fire", "first", "five", "for",
+        "former", "formerly", "forty", "found", "four", "from", "front", "full", "further", "get", "give", "go", "had",
+        "has", "have", "he", "hence", "her", "here", "hereafter", "hereby", "herein", "hereupon", "hers", "herself",
+        "him", "himself", "his", "how", "however", "hundred", "i", "ie", "if", "in", "inc", "indeed", "interest",
+        "into", "is", "it", "its", "itself", "keep", "last", "latter", "latterly", "least", "less", "ltd", "made",
+        "many", "may", "me", "meanwhile", "might", "mill", "mine", "more", "moreover", "most", "mostly", "move", "much",
+        "must", "my", "myself", "name", "namely", "neither", "nevertheless", "next", "nine", "nobody", "now", "nowhere",
+        "of", "off", "often", "on", "once", "one", "only", "onto", "or", "other", "others", "otherwise", "our", "ours",
+        "ourselves", "out", "over", "own", "part", "per", "perhaps", "please", "put", "rather", "re", "same", "see",
+        "serious", "several", "she", "should", "show", "side", "since", "sincere", "six", "sixty", "so", "some",
+        "somehow", "someone", "something", "sometime", "sometimes", "somewhere", "still", "such", "system", "take",
+        "ten", "than", "that", "the", "their", "them", "themselves", "then", "thence", "there", "thereafter", "thereby",
+        "therefore", "therein", "thereupon", "these", "they", "thick", "thin", "third", "this", "those", "though",
+        "three", "through", "throughout", "thru", "thus", "to", "together", "too", "top", "toward", "towards", "twelve",
+        "twenty", "two", "un", "under", "until", "up", "upon", "us", "very", "via", "was", "we", "well", "were", "what",
+        "whatever", "when", "whence", "whenever", "where", "whereafter", "whereas", "whereby", "wherein", "whereupon",
+        "wherever", "whether", "which", "while", "whither", "who", "whoever", "whole", "whom", "whose", "why", "will",
+        "with", "within", "without", "would", "yet", "you", "your", "yours", "yourself", "yourselves"
     ]
-    
-    # Initialise
-    heads = []
-    heads_track = {}
-    bodies = []
-    bodies_track = {}
-    test_heads = []
-    test_heads_track = {}
-    test_bodies = []
-    test_bodies_track = {}
 
-    
+    # Initialise
+    test_heads = []
+    test_bodies = []
+
     # Identify unique heads and bodies
-    for instance in data.stances:
-        head = instance['Headline']
-        body_id = instance['Body ID']
-        if head not in heads_track:
-            heads.append(head)
-            heads_track[head] = 1
-        if body_id not in bodies_track:
-            bodies.append(data.articles[body_id])
-            bodies_track[body_id] = 1
+    '''
+        here i have deleted the unique bodies since its not fully compatible with our dataset
+        also, it uses only the body id to check, 
+        i prupose to REALLY check it with other ways
+    '''
+
     """        
     for instance in test.instances:
        head = instance['Headline']
@@ -321,23 +304,23 @@ def tfIdf_parameteres(data,lim_unigram):
        if body_id not in test_bodies_track:
            test_bodies.append(test.bodies[body_id])
            test_bodies_track[body_id] = 1
-    """        
-            
+    """
+
     # Create vectorizers and BOW and TF arrays for train set
-    bow_vectorizer = CountVectorizer(max_features=lim_unigram, stop_words=stop_words) # initlaiser l'objet countVectorize avec stop of words
-    bow = bow_vectorizer.fit_transform(heads + bodies)  # Train set only, recuperer les vercteur avec TF des docuement bow.toarray, recuperer les bow   ow_vectorizer.get_feature_names())    
+    bow_vectorizer = CountVectorizer(max_features=lim_unigram,
+                                     stop_words=stop_words)  # initlaiser l'objet countVectorize avec stop of words
+    bow = bow_vectorizer.fit_transform(
+        heads + bodies)  # Train set only, recuperer les vercteur avec TF des docuement bow.toarray, recuperer les bow   ow_vectorizer.get_feature_names())
     tfreq_vectorizer = TfidfTransformer(use_idf=False).fit(bow)
-          
-    #tf-idf 
-    tfidf_vectorizer = TfidfVectorizer(max_features=lim_unigram, stop_words=stop_words).\
-        fit(heads + bodies + test_heads + test_bodies)  
-        
+
+    # tf-idf
+    tfidf_vectorizer = TfidfVectorizer(max_features=lim_unigram, stop_words=stop_words). \
+        fit(heads + bodies + test_heads + test_bodies)
+
     return bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer
 
 
-
 def tfIdf_features(headlines, bodies, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
-    
     # Initialise
     transformation = []
     heads_track = {}
@@ -345,9 +328,8 @@ def tfIdf_features(headlines, bodies, bow_vectorizer, tfreq_vectorizer, tfidf_ve
     cos_track = {}
 
     # Process train set
-    for instance in headlines:
-        head = instance['Headline']
-        body_id = instance['Body ID']
+    for body_id, head in enumerate(headlines):
+
         if head not in heads_track:
             head_bow = bow_vectorizer.transform([head]).toarray()
             head_tf = tfreq_vectorizer.transform(head_bow).toarray()[0].reshape(1, -1)
@@ -369,8 +351,7 @@ def tfIdf_features(headlines, bodies, bow_vectorizer, tfreq_vectorizer, tfidf_ve
             cos_track[(head, body_id)] = tfidf_cos
         else:
             tfidf_cos = cos_track[(head, body_id)]
-        feat_vec = np.squeeze(np.c_[head_tf,body_tf,tfidf_cos])
+        feat_vec = np.squeeze(np.c_[head_tf, body_tf, tfidf_cos])
         transformation.append(feat_vec)
 
     return transformation
-
