@@ -1,6 +1,7 @@
 *.tag*
 splits/*.txt
 features/*.npy
+dataSets/fake_gold_real_articles.csv
 *.pyc
 .DS_Store
 .idea

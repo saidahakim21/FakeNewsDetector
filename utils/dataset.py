@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 
 class DataSet():
-    def __init__(self, name="", path="fnc-1"):
+    def __init__(self, name="", path="dataSets"):
         self.path = path
 
         print("Reading dataset")

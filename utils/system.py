@@ -4,7 +4,7 @@ import re
 import argparse
 
 def parse_params():
-    parser = argparse.ArgumentParser(description='FakeNewsChallenge fnc-1-baseline')
+    parser = argparse.ArgumentParser(description='FakeNewsChallenge dataSets-baseline')
     parser.add_argument('-c', '--clean-cache', action='store_true', default=False, help="clean cache files")
     params = parser.parse_args()
 

@@ -92,7 +92,7 @@ def printConfusion(best_predicted, actual):
 if __name__ == "__main__":
 
     # Load the training dataset and generate folds
-    dataSet = DataSet(name="train")  # lire la dataset de TRAINING
+    dataSet = DataSet(name="fake_gold_real_articles")  # lire la dataset de TRAINING
     training_ids, testing_ids = generate_splited_data_ids(dataSet, 0.9)
 
     clean_training_testing_ids = deleteEmptyBodyIds(training_ids, dataSet)
