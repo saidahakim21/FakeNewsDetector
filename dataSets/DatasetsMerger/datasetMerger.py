@@ -1,4 +1,5 @@
 import csv
+from _csv import QUOTE_ALL
 from csv import DictReader
 import sys
 import random
@@ -60,7 +61,7 @@ if __name__ == "__main__":
     with open('fake_gold_real_articles.csv', 'w') as csvfile:
         filewriter = csv.writer(csvfile, delimiter=',',
                                 lineterminator='\r\n',
-                              quoting=it acsv.QUOTE_ALL)
+                                quoting= QUOTE_ALL)
         filewriter.writerow(['id','title','author','text','label'])
 
         for i,e in tqdm(enumerate(perfectDataset)):
