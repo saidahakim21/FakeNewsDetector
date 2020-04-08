@@ -23,15 +23,10 @@ def stackFeatures(features):
     return stack
 
 
-def generate_features(ids, d, name, possibility):
+def generate_features(headlines, bodies, name,bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer, possibility):
     headlines, bodies, y = [], [], []
 
-    for id in ids:  # pour chaque stance(Body-ID, stance) faire :
-        y.append(int(d.trainData[id]['label']))
-        headlines.append(d.trainData[id]['title'])
-        bodies.append(d.trainData[id]['text'])
     # a la fin on aura trois tableau et pour chaque index , ex : 0 ça donne : y[0]  = 'disagree'  headlines[0] = 'titre' bodies[0]= ' un body'
-    bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer = tfIdf_parameteres(headlines, bodies, 50)
     X_overlap = gen_or_load_feats(word_overlap_features, headlines, bodies, "features/overlap." + name + ".npy")  # pour chaque feature il crée un tableau X_feature[0] = 'valeur'
     X_refuting = gen_or_load_feats(refuting_features, headlines, bodies, "features/refuting." + name + ".npy")
     X_grammar_dependencies = gen_or_load_feats(grammar_dependencies_count, headlines, bodies, "features/grammar" + name + ".npy")
@@ -58,6 +53,18 @@ def generate_features(ids, d, name, possibility):
     verbos = "Test with the following Features : " + verbos
     X = stackFeatures(features)
     return X, y, verbos
+
+def parseDataSet(ids, d):
+    headlines, bodies, y = [], [], []
+
+    for id in ids:  # pour chaque stance(Body-ID, stance) faire :
+        y.append(int(d.trainData[id]['label']))
+        headlines.append(d.trainData[id]['title'])
+        bodies.append(d.trainData[id]['text'])
+        
+    return headlines, bodies, y
+        
+    
 
 
 def deleteEmptyBodyIds(ids, dataSet):
@@ -94,7 +101,23 @@ if __name__ == "__main__":
     # Load the training dataset and generate folds
     dataSet = DataSet(name="fake_gold_real_articles")  # lire la dataset de TRAINING
     training_ids, testing_ids = generate_splited_data_ids(dataSet, 0.9)
+    
+    train_Headlines, train_bodies,train_labels = parseDataSet(training_ids, dataSet) 
+    test_Headlines, test_bodies,test_labels = parseDataSet(testing_ids, dataSet) 
 
+    
+    #get tf-idf parameters 
+    bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer = tfIdf_parameteres(train_Headlines, train_bodies, 50)
+    
+    
+
+    
+    
+
+
+    
+    
+    
     clean_training_testing_ids = deleteEmptyBodyIds(training_ids, dataSet)
 
     folds_ids = kfold_split(clean_training_testing_ids, 10)
