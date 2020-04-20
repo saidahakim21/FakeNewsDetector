@@ -1,8 +1,14 @@
 import numpy as np
-from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import GradientBoostingClassifier, AdaBoostClassifier, RandomForestClassifier, BaggingClassifier
+from sklearn.linear_model import Perceptron, LogisticRegression
 from sklearn.metrics import confusion_matrix
-from feature_engineering import refuting_features, gen_or_load_feats, grammar_dependencies_count, tfIdf_features, \
-    tfIdf_parameteres, word_overlap_features
+from sklearn.naive_bayes import BernoulliNB, GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.svm import LinearSVC
+from sklearn.tree import DecisionTreeClassifier, ExtraTreeClassifier
+
+from feature_engineering import tfIdf_parameteres, gen_or_load_feats, tfIdf_features, grammar_dependencies_count
 from utils.dataset import DataSet
 from utils.generate_test_splits import generate_splited_data_ids, kfold_split
 from utils.score import score_submission
@@ -23,34 +29,18 @@ def stackFeatures(features):
     return stack
 
 
-def generate_features(headlines, bodies, name, possibility ,bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
+def generate_features(headlines, bodies, name, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
+    # X_overlap = gen_or_load_feats(word_overlap_features, headlines, bodies, "features/overlap." + name + ".npy")  # pour chaque feature il crée un tableau X_feature[0] = 'valeur'
+    # X_refuting = gen_or_load_feats(refuting_features, headlines, bodies, "features/refuting." + name + ".npy")
+    X_grammar_dependencies = gen_or_load_feats(grammar_dependencies_count, headlines, bodies,
+                                               "features/grammar" + name + ".npy")
+    X_tf_idf = gen_or_load_feats(tfIdf_features, headlines, bodies, "features/tfidf." + name + ".npy", bow_vectorizer,
+                                 tfreq_vectorizer, tfidf_vectorizer)
 
-    X_overlap = gen_or_load_feats(word_overlap_features, headlines, bodies, "features/overlap." + name + ".npy")  # pour chaque feature il crée un tableau X_feature[0] = 'valeur'
-    X_refuting = gen_or_load_feats(refuting_features, headlines, bodies, "features/refuting." + name + ".npy")
-    X_grammar_dependencies = gen_or_load_feats(grammar_dependencies_count, headlines, bodies, "features/grammar" + name + ".npy")
-    X_tf_idf = gen_or_load_feats(tfIdf_features, headlines, bodies, "features/tfidf." + name + ".npy", bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
-
-    features = []
-    verbos = ""
-    if possibility[0] == '1':
-        features.append(X_overlap)
-        verbos += " * X_Overlap"
-
-    if possibility[1] == '1':
-        features.append(X_refuting)
-        verbos += " * X_refuting"
-
-    if possibility[2] == '1':
-        features.append(X_grammar_dependencies)
-        verbos += " * X_grammar_dependencies"
-
-    if possibility[3] == '1':
-        features.append(X_tf_idf)
-        verbos += " * X_tf_idf"
-
-    verbos = "Test with the following Features : " + verbos
+    features = [X_grammar_dependencies, X_tf_idf]
     X = stackFeatures(features)
-    return X, verbos
+    return X
+
 
 def parseDataSet(ids, d):
     headlines, bodies, y = [], [], []
@@ -59,10 +49,8 @@ def parseDataSet(ids, d):
         y.append(int(d.trainData[id]['label']))
         headlines.append(d.trainData[id]['title'])
         bodies.append(d.trainData[id]['text'])
-        
+
     return headlines, bodies, y
-        
-    
 
 
 def deleteEmptyBodyIds(ids, dataSet):
@@ -76,56 +64,57 @@ def deleteEmptyBodyIds(ids, dataSet):
 
 
 def printConfusion(best_predicted, actual):
-    cm = confusion_matrix(actual,best_predicted)
+    cm = confusion_matrix(actual, best_predicted)
     trueNegative = cm[0][0]
     falsePositive = cm[0][1]
     falseNegative = cm[1][0]
     truePositive = cm[1][1]
-    precision = truePositive / (truePositive+falsePositive)
-    recall = truePositive /(truePositive+falseNegative)
-    fScore = 2 * (precision*recall / precision+recall)
+    precision = truePositive / (truePositive + falsePositive)
+    recall = truePositive / (truePositive + falseNegative)
+    fScore = 2 * (precision * recall / precision + recall)
 
     row_format = "{:>15}" * 3
-    print(row_format.format("", 'Fake','Real'))
-    print(row_format.format("Fake", str(trueNegative),str(falsePositive)))
-    print(row_format.format("Real", str(falseNegative),str(truePositive)))
-    print("precision  = "+str(precision))
-    print("recall  = "+str(recall))
-    print("fScore  = "+str(fScore))
+    print(row_format.format("", 'Fake', 'Real'))
+    print(row_format.format("Fake", str(trueNegative), str(falsePositive)))
+    print(row_format.format("Real", str(falseNegative), str(truePositive)))
+    print("precision  = " + str(precision))
+    print("recall  = " + str(recall))
+    print("fScore  = " + str(fScore))
 
 
 if __name__ == "__main__":
 
     # Load the training dataset and generate folds
     dataSet = DataSet(name="fake_gold_real_articles")  # lire la dataset de TRAINING
-    training_ids, testing_ids = generate_splited_data_ids(dataSet, 0.9)
-    
-    train_Headlines, train_bodies,train_labels = parseDataSet(training_ids, dataSet) 
-    test_Headlines, test_bodies,test_labels = parseDataSet(testing_ids, dataSet) 
+    training_ids, testing_ids = generate_splited_data_ids(dataSet, 0.8)
 
-    #get tf-idf parameters 
+    train_Headlines, train_bodies, train_labels = parseDataSet(training_ids, dataSet)
+    test_Headlines, test_bodies, test_labels = parseDataSet(testing_ids, dataSet)
+
+    # get tf-idf parameters
     bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer = tfIdf_parameteres(train_Headlines, train_bodies, 50)
 
     folds_ids = kfold_split(training_ids, 10)
 
+    classifiers = [GradientBoostingClassifier()]
 
-    for possibility in range(1, 16):
-        x = "{0:b}".format(possibility)
-        x = x.rjust(4, '0')
+    for clf in classifiers:
 
         Xs = dict()
         ys = dict()
 
         index = 0
         for fold_ids in folds_ids:
-            fold_headlines, fold_bodies,fold_lables = parseDataSet(fold_ids, dataSet)
+            fold_headlines, fold_bodies, fold_lables = parseDataSet(fold_ids, dataSet)
             ys[index] = fold_lables
-            Xs[index], p = generate_features(fold_headlines, fold_bodies, str(index), x, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
+            Xs[index] = generate_features(fold_headlines, fold_bodies, str(index), bow_vectorizer, tfreq_vectorizer,
+                                          tfidf_vectorizer)
             index += 1
 
         # Load/Precompute all features now
         y_holdout = test_labels
-        X_holdout, _ = generate_features(test_Headlines, test_bodies, "holdout", x, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
+        X_holdout = generate_features(test_Headlines, test_bodies, "holdout", bow_vectorizer, tfreq_vectorizer,
+                                      tfidf_vectorizer)
 
         index = 0
         best_score = 0
@@ -142,7 +131,6 @@ if __name__ == "__main__":
 
             trainsy = np.hstack(tuple([y_train[i] for i in y_train]))
 
-            clf = GradientBoostingClassifier()
             clf.fit(trains, trainsy)
 
             X_test = Xs[index]
@@ -155,7 +143,7 @@ if __name__ == "__main__":
             max_fold_score = score_submission(actual, actual)
 
             score = predicted_score / max_fold_score
-
+            print("score for fold " + str(index) + ": " + str(score))
             if score > best_score:
                 best_score = score
                 best_fold = clf
@@ -163,15 +151,14 @@ if __name__ == "__main__":
                 best_actual = actual
 
             index += 1
-        print(p)
 
+        print("Results for : " + str(type(clf).__name__))
         holdout_predicted = [a for a in best_fold.predict(X_holdout)]
         holdout_actual = [a for a in y_holdout]
-
         holdout_score = score_submission(holdout_actual, holdout_predicted)
-        holdout_max = score_submission(holdout_actual,holdout_actual)
+        holdout_max = score_submission(holdout_actual, holdout_actual)
         print("best fold score : " + str(best_score))
         printConfusion(best_predicted, best_actual)
-        print("classifier score on holdout : "+ str(holdout_score/holdout_max))
-        printConfusion(holdout_predicted,holdout_actual)
-        print("============"+str(possibility)+"====================")
+        print("classifier score on holdout : " + str(holdout_score / holdout_max))
+        printConfusion(holdout_predicted, holdout_actual)
+        print("================================")
