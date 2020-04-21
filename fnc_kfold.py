@@ -98,7 +98,7 @@ if __name__ == "__main__":
 
     # Load the training dataset and generate folds
     dataSet = DataSet(name="fake_gold_real_articles")  # lire la dataset de TRAINING
-    training_ids, testing_ids = generate_splited_data_ids(dataSet, 0.9)
+    training_ids, testing_ids = generate_splited_data_ids(dataSet, 0.8)
     
     train_Headlines, train_bodies,train_labels = parseDataSet(training_ids, dataSet) 
     test_Headlines, test_bodies,test_labels = parseDataSet(testing_ids, dataSet) 

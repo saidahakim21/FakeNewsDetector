@@ -1,0 +1,240 @@
+Test with the following Features :  * X_tf_idf
+best fold score : 0.9079229122055674
+                          Fake           Real
+           Fake            905             51
+           Real            121            791
+precision  = 0.9394299287410927
+recall  = 0.8673245614035088
+fScore  = 3.469298245614035
+classifier score on holdout : 0.8931706272746736
+                          Fake           Real
+           Fake           2169            146
+           Real            353           2003
+precision  = 0.9320614239181014
+recall  = 0.8501697792869269
+fScore  = 3.4006791171477078
+============1====================
+Test with the following Features :  * X_grammar_dependencies
+best fold score : 0.8303905831995719
+                          Fake           Real
+           Fake            777            164
+           Real            153            775
+precision  = 0.825346112886049
+recall  = 0.8351293103448276
+fScore  = 3.3405172413793105
+classifier score on holdout : 0.8083922072361379
+                          Fake           Real
+           Fake           1873            442
+           Real            453           1903
+precision  = 0.8115138592750533
+recall  = 0.8077249575551783
+fScore  = 3.230899830220713
+============2====================
+Test with the following Features :  * X_grammar_dependencies * X_tf_idf
+best fold score : 0.9186295503211992
+                          Fake           Real
+           Fake            901             55
+           Real             97            815
+precision  = 0.9367816091954023
+recall  = 0.893640350877193
+fScore  = 3.574561403508772
+classifier score on holdout : 0.9023763648041104
+                          Fake           Real
+           Fake           2176            139
+           Real            317           2039
+precision  = 0.9361799816345271
+recall  = 0.8654499151103565
+fScore  = 3.461799660441426
+============3====================
+Test with the following Features :  * X_refuting
+best fold score : 0.5088282504012841
+                          Fake           Real
+           Fake            939              5
+           Real            913             12
+precision  = 0.7058823529411765
+recall  = 0.012972972972972972
+fScore  = 0.05189189189189189
+classifier score on holdout : 0.49710982658959535
+                          Fake           Real
+           Fake           2291             24
+           Real           2325             31
+precision  = 0.5636363636363636
+recall  = 0.013157894736842105
+fScore  = 0.05263157894736842
+============4====================
+Test with the following Features :  * X_refuting * X_tf_idf
+best fold score : 0.9079229122055674
+                          Fake           Real
+           Fake            905             51
+           Real            121            791
+precision  = 0.9394299287410927
+recall  = 0.8673245614035088
+fScore  = 3.469298245614035
+classifier score on holdout : 0.8921001926782274
+                          Fake           Real
+           Fake           2169            146
+           Real            358           1998
+precision  = 0.9319029850746269
+recall  = 0.8480475382003395
+fScore  = 3.392190152801358
+============5====================
+Test with the following Features :  * X_refuting * X_grammar_dependencies
+best fold score : 0.8303905831995719
+                          Fake           Real
+           Fake            777            164
+           Real            153            775
+precision  = 0.825346112886049
+recall  = 0.8351293103448276
+fScore  = 3.3405172413793105
+classifier score on holdout : 0.8083922072361379
+                          Fake           Real
+           Fake           1873            442
+           Real            453           1903
+precision  = 0.8115138592750533
+recall  = 0.8077249575551783
+fScore  = 3.230899830220713
+============6====================
+Test with the following Features :  * X_refuting * X_grammar_dependencies * X_tf_idf
+best fold score : 0.9191648822269807
+                          Fake           Real
+           Fake            901             55
+           Real             96            816
+precision  = 0.9368541905855339
+recall  = 0.8947368421052632
+fScore  = 3.5789473684210527
+classifier score on holdout : 0.9025904517233997
+                          Fake           Real
+           Fake           2177            138
+           Real            317           2039
+precision  = 0.9366100137804317
+recall  = 0.8654499151103565
+fScore  = 3.461799660441426
+============7====================
+Test with the following Features :  * X_Overlap
+best fold score : 0.6597110754414125
+                          Fake           Real
+           Fake            573            371
+           Real            265            660
+precision  = 0.6401551891367604
+recall  = 0.7135135135135136
+fScore  = 2.854054054054054
+classifier score on holdout : 0.6435452793834296
+                          Fake           Real
+           Fake           1311           1004
+           Real            661           1695
+precision  = 0.6280103742126714
+recall  = 0.719439728353141
+fScore  = 2.877758913412564
+============8====================
+Test with the following Features :  * X_Overlap * X_tf_idf
+best fold score : 0.9089935760171306
+                          Fake           Real
+           Fake            900             56
+           Real            114            798
+precision  = 0.9344262295081968
+recall  = 0.875
+fScore  = 3.5
+classifier score on holdout : 0.8946692357096981
+                          Fake           Real
+           Fake           2156            159
+           Real            333           2023
+precision  = 0.9271310724106324
+recall  = 0.8586587436332768
+fScore  = 3.434634974533107
+============9====================
+Test with the following Features :  * X_Overlap * X_grammar_dependencies
+best fold score : 0.8378812199036918
+                          Fake           Real
+           Fake            779            162
+           Real            141            787
+precision  = 0.8292939936775553
+recall  = 0.8480603448275862
+fScore  = 3.3922413793103448
+classifier score on holdout : 0.8139584671376578
+                          Fake           Real
+           Fake           1897            418
+           Real            451           1905
+precision  = 0.8200602668962549
+recall  = 0.8085738539898133
+fScore  = 3.234295415959253
+============10====================
+Test with the following Features :  * X_Overlap * X_grammar_dependencies * X_tf_idf
+best fold score : 0.9234475374732334
+                          Fake           Real
+           Fake            905             51
+           Real             92            820
+precision  = 0.9414466130884042
+recall  = 0.8991228070175439
+fScore  = 3.5964912280701755
+classifier score on holdout : 0.9045172339970028
+                          Fake           Real
+           Fake           2180            135
+           Real            311           2045
+precision  = 0.9380733944954128
+recall  = 0.8679966044142614
+fScore  = 3.4719864176570456
+============11====================
+Test with the following Features :  * X_Overlap * X_refuting
+best fold score : 0.6655965757089353
+                          Fake           Real
+           Fake            575            369
+           Real            256            669
+precision  = 0.6445086705202312
+recall  = 0.7232432432432433
+fScore  = 2.892972972972973
+classifier score on holdout : 0.6433311924641404
+                          Fake           Real
+           Fake           1301           1014
+           Real            652           1704
+precision  = 0.6269315673289183
+recall  = 0.7232597623089984
+fScore  = 2.8930390492359934
+============12====================
+Test with the following Features :  * X_Overlap * X_refuting * X_tf_idf
+best fold score : 0.908458244111349
+                          Fake           Real
+           Fake            899             57
+           Real            114            798
+precision  = 0.9333333333333333
+recall  = 0.875
+fScore  = 3.5
+classifier score on holdout : 0.8948833226289874
+                          Fake           Real
+           Fake           2162            153
+           Real            338           2018
+precision  = 0.9295255642561032
+recall  = 0.8565365025466893
+fScore  = 3.4261460101867574
+============13====================
+Test with the following Features :  * X_Overlap * X_refuting * X_grammar_dependencies
+best fold score : 0.8378812199036918
+                          Fake           Real
+           Fake            779            162
+           Real            141            787
+precision  = 0.8292939936775553
+recall  = 0.8480603448275862
+fScore  = 3.3922413793103448
+classifier score on holdout : 0.8139584671376578
+                          Fake           Real
+           Fake           1897            418
+           Real            451           1905
+precision  = 0.8200602668962549
+recall  = 0.8085738539898133
+fScore  = 3.234295415959253
+============14====================
+Test with the following Features :  * X_Overlap * X_refuting * X_grammar_dependencies * X_tf_idf
+best fold score : 0.9234475374732334
+                          Fake           Real
+           Fake            905             51
+           Real             92            820
+precision  = 0.9414466130884042
+recall  = 0.8991228070175439
+fScore  = 3.5964912280701755
+classifier score on holdout : 0.9045172339970028
+                          Fake           Real
+           Fake           2180            135
+           Real            311           2045
+precision  = 0.9380733944954128
+recall  = 0.8679966044142614
+fScore  = 3.4719864176570456
+============15====================
