@@ -1,13 +1,8 @@
+#this is an adapted version of the master branch script for running the winning features on a set of classifiers
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier, AdaBoostClassifier, RandomForestClassifier, BaggingClassifier
 from sklearn.linear_model import Perceptron, LogisticRegression
 from sklearn.metrics import confusion_matrix
-from sklearn.naive_bayes import BernoulliNB, GaussianNB
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.neural_network import MLPClassifier
-from sklearn.svm import LinearSVC
-from sklearn.tree import DecisionTreeClassifier, ExtraTreeClassifier
-
 from feature_engineering import tfIdf_parameteres, gen_or_load_feats, tfIdf_features, grammar_dependencies_count
 from utils.dataset import DataSet
 from utils.generate_test_splits import generate_splited_data_ids, kfold_split

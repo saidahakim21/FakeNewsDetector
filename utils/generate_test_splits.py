@@ -19,14 +19,6 @@ def split_ids(article_ids, training):
     return training_ids, hold_out_ids
 
 
-def read_ids(file,base):
-    ids = []
-    with open(base+"/"+file,"r") as f:
-        for line in f:
-           ids.append(int(line))
-        return ids
-
-
 
 
 def kfold_split(folds_ids, n_folds = 10):

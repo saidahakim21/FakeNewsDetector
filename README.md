@@ -1,5 +1,5 @@
 Fake News Detector Model 
 
-please extract the dataset file named 'fake_gold_real_articles.csv.zip'inside Datasets Folder.
+this branch is for running winning features  on a set of classifiers
 
-please create a folder in the root directory named 'features'
+please run classifier_tests script for results
