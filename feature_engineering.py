@@ -61,6 +61,20 @@ def word_overlap_features(headlines,
             print("An exception occurred")
     return X
 
+def stackFeatures(features):
+    stack = []  # tableau des features
+
+    for i in range(len(features[0])):
+        tmp = []
+        for j in range(len(features)):
+            if 0 == len(tmp):
+                tmp = features[j][i]
+            else:
+                tmp = list(tmp) + list(features[j][i])
+        stack.append(tmp)
+
+    return stack
+
 
 def refuting_features(headlines, bodies):
     _refuting_words = [
