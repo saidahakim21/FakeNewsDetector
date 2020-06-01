@@ -1,3 +1,4 @@
+# script containing all our feature engineering part
 import os
 import re
 import nltk  # natural language processing toolkit
@@ -13,12 +14,27 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 _wnl = nltk.WordNetLemmatizer()  # Lemmatizer converts a word to original form
 
+# this is a custom version of python's vstack for our program
+def stackFeatures(features):
+    stack = []  # tableau des features
+
+    for i in range(len(features[0])):
+        tmp = []
+        for j in range(len(features)):
+            if 0 == len(tmp):
+                tmp = features[j][i]
+            else:
+                tmp = list(tmp) + list(features[j][i])
+        stack.append(tmp)
+
+    return stack
+
 
 def normalize_word(w):  # original form in lower case, example dogs => dog
     return _wnl.lemmatize(w).lower()
 
 
-def get_tokenized_lemmas(s):
+def get_tokenized_lemmas(s): # tokeinize lemmas, for more details please check the report
     return [normalize_word(t) for t in nltk.word_tokenize(s)]
 
 
@@ -31,7 +47,7 @@ def remove_stopwords(l):
     # Removes stopwords from a list of tokens
     return [w for w in l if w not in feature_extraction.text.ENGLISH_STOP_WORDS]
 
-
+#here, if the feature is already generated, it will be loaded from disk, otherwise we'll generate and save the array into the disk for futur calls
 def gen_or_load_feats(feat_fn, headlines, bodies, feature_file, bow_vectorizer=None, tfreq_vectorizer=None,
                       tfidf_vectorizer=None):
     if not os.path.isfile(feature_file):
@@ -44,7 +60,7 @@ def gen_or_load_feats(feat_fn, headlines, bodies, feature_file, bow_vectorizer=N
 
     return np.load(feature_file, allow_pickle=True)
 
-
+#here, if the feature is already generated, it will be loaded from disk, otherwise we'll generate and save the array into the disk for futur calls
 def word_overlap_features(headlines,
                           bodies):  # ici il calcule la moyenne de l'intersection des mots entre headline,body  sur l'union des mots du headline,body
     X = []
@@ -61,7 +77,7 @@ def word_overlap_features(headlines,
             print("An exception occurred")
     return X
 
-
+#refuting word feature, please check report for more details
 def refuting_features(headlines, bodies):
     _refuting_words = [
         'fake',
@@ -87,7 +103,7 @@ def refuting_features(headlines, bodies):
         X.append(features)
     return X
 
-
+#polarity feature, please check report for more details
 def polarity_features(headlines, bodies):
     _refuting_words = [
         'fake',
@@ -164,7 +180,7 @@ def append_ngrams(features, text_headline, text_body, size):
     features.append(grams_early_hits)
     return features
 
-
+# hand feature, please check report for more details
 def hand_features(headlines, bodies):
     def binary_co_occurence(headline, body):
         # Count how many times a token in the title
@@ -216,7 +232,7 @@ def hand_features(headlines, bodies):
 
     return X
 
-
+# Syntactical Grammar Dependency Feature, please check report for more details
 def grammar_dependencies_count(headlines, bodies):
     parser = spacy.load('en')
 
@@ -253,7 +269,7 @@ def grammar_dependencies_count(headlines, bodies):
 
     return rv
 
-
+# TfIDF cosinus similarity feature, please check report for more details
 def tfIdf_parameteres(heads, bodies, lim_unigram):
     stop_words = [
         "a", "about", "above", "across", "after", "afterwards", "again", "against", "all", "almost", "alone", "along",

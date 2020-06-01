@@ -3,10 +3,9 @@ from _csv import QUOTE_ALL
 from csv import DictReader
 import sys
 import random
-
 from tqdm import tqdm
 
-
+#reads the dataset from csv files and load it into the memory in the shape of python array
 def read(path,filename):
     rows = []
     csv.field_size_limit(sys.maxsize)
@@ -18,6 +17,7 @@ def read(path,filename):
             rows.append(line)
     return rows
 
+#cleans the real articles lines (if either title or author or text) is null , the line will be dumped
 def cleanRealArticles(realRaw):
     cleanedList  = []
     for e in realRaw:
@@ -32,7 +32,7 @@ def cleanRealArticles(realRaw):
         cleanedList.append(e)
     return cleanedList
 
-
+#cleans the real articles lines (if either text or title) is null , or the line isn't in english , then it will be dumped
 def cleanFakeArticles(fakeRaw):
     cleanedFake = []
     for e in fakeRaw:

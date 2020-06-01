@@ -1,31 +1,25 @@
+#This program runs all the possible combinations of our features and logs the results into the console
+#  This is the training process to extract the best and optimal model possible
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.metrics import confusion_matrix
 from feature_engineering import refuting_features, gen_or_load_feats, grammar_dependencies_count, tfIdf_features, \
-    tfIdf_parameteres, word_overlap_features
+    tfIdf_parameteres, word_overlap_features, stackFeatures
 from utils.dataset import DataSet
 from utils.generate_test_splits import generate_splited_data_ids, kfold_split
 from utils.score import score_submission
 
-
-def stackFeatures(features):
-    stack = []  # tableau des features
-
-    for i in range(len(features[0])):
-        tmp = []
-        for j in range(len(features)):
-            if 0 == len(tmp):
-                tmp = features[j][i]
-            else:
-                tmp = list(tmp) + list(features[j][i])
-        stack.append(tmp)
-
-    return stack
-
-
+# This methode generate an array containing a concat of the features combination choosed  by the parameter 'possiblity'
+#params :
+# headlines : headlines of the articles loaded from the chosen dataset
+# bodies :  headlines of the articles loaded from the chosen dataset
+# name : name of the current feature+fold to be set for the file
+# possibility : the combination chosen for the call, binary string i.e : "1001" each bit correspand for a feature wheter its enabled or not
+# bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer : vectorizers for TFiDf feature
 def generate_features(headlines, bodies, name, possibility ,bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
+    #generate or load the features, note that we generate the features even if they're not currently used in this possibility, since it will be saved for later possibilities
 
-    X_overlap = gen_or_load_feats(word_overlap_features, headlines, bodies, "features/overlap." + name + ".npy")  # pour chaque feature il crée un tableau X_feature[0] = 'valeur'
+    X_overlap = gen_or_load_feats(word_overlap_features, headlines, bodies, "features/overlap." + name + ".npy")
     X_refuting = gen_or_load_feats(refuting_features, headlines, bodies, "features/refuting." + name + ".npy")
     X_grammar_dependencies = gen_or_load_feats(grammar_dependencies_count, headlines, bodies, "features/grammar" + name + ".npy")
     X_tf_idf = gen_or_load_feats(tfIdf_features, headlines, bodies, "features/tfidf." + name + ".npy", bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
@@ -49,9 +43,10 @@ def generate_features(headlines, bodies, name, possibility ,bow_vectorizer, tfre
         verbos += " * X_tf_idf"
 
     verbos = "Test with the following Features : " + verbos
-    X = stackFeatures(features)
+    X = stackFeatures(features) # stack the generated feature in  a long vector table.
     return X, verbos
 
+#read the dataset csv file and load it into python arrays
 def parseDataSet(ids, d):
     headlines, bodies, y = [], [], []
 
@@ -61,20 +56,8 @@ def parseDataSet(ids, d):
         bodies.append(d.trainData[id]['text'])
         
     return headlines, bodies, y
-        
-    
 
-
-def deleteEmptyBodyIds(ids, dataSet):
-    clean_ids = []
-    for id in ids:
-        cleanTitle = dataSet.trainData[int(id)]['title'].encode('ascii', 'ignore').decode('ascii')
-        cleanText = dataSet.trainData[int(id)]['text'].encode('ascii', 'ignore').decode('ascii')
-        if (cleanText and cleanTitle):
-            clean_ids.append(id)
-    return clean_ids
-
-
+#print the confusion matrix along side useful stats information, (precision, recall, f-score)
 def printConfusion(best_predicted, actual):
     cm = confusion_matrix(actual,best_predicted)
     trueNegative = cm[0][0]
@@ -103,12 +86,13 @@ if __name__ == "__main__":
     train_Headlines, train_bodies,train_labels = parseDataSet(training_ids, dataSet) 
     test_Headlines, test_bodies,test_labels = parseDataSet(testing_ids, dataSet) 
 
-    #get tf-idf parameters 
+    #generate tfidf vectorizers
     bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer = tfIdf_parameteres(train_Headlines, train_bodies, 50)
 
+    #split loaded data into folds
     folds_ids = kfold_split(training_ids, 10)
 
-
+    #iterate possibilities, from 1 to 16, every number will be presented in binary format (i.e : possibility =1 => pssibility = 0001 => only first feature is enabled)
     for possibility in range(1, 16):
         x = "{0:b}".format(possibility)
         x = x.rjust(4, '0')
@@ -117,13 +101,14 @@ if __name__ == "__main__":
         ys = dict()
 
         index = 0
+        #generate feature for the folds :
         for fold_ids in folds_ids:
             fold_headlines, fold_bodies,fold_lables = parseDataSet(fold_ids, dataSet)
             ys[index] = fold_lables
             Xs[index], p = generate_features(fold_headlines, fold_bodies, str(index), x, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
             index += 1
 
-        # Load/Precompute all features now
+        #         #generate feature for the hold-out dataset :
         y_holdout = test_labels
         X_holdout, _ = generate_features(test_Headlines, test_bodies, "holdout", x, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
 
@@ -131,6 +116,7 @@ if __name__ == "__main__":
         best_score = 0
         best_fold = None
 
+        #cross validation over the folds:
         for fold_ids in folds_ids:
             X_train = dict(Xs)
             del X_train[index]
@@ -163,7 +149,9 @@ if __name__ == "__main__":
                 best_actual = actual
 
             index += 1
+        #print the possibility's string format
         print(p)
+        #print the possibility's best-fold score and the holdout score
 
         holdout_predicted = [a for a in best_fold.predict(X_holdout)]
         holdout_actual = [a for a in y_holdout]
