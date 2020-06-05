@@ -1,12 +1,18 @@
 #this is an adapted version of the master branch script for running the winning features on a set of classifiers
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier, AdaBoostClassifier, RandomForestClassifier, BaggingClassifier
-from sklearn.linear_model import Perceptron, LogisticRegression
+from sklearn.linear_model import Perceptron, LogisticRegression, SGDClassifier
 from sklearn.metrics import confusion_matrix
+from sklearn.naive_bayes import BernoulliNB, GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import LinearSVC
+from sklearn.tree import DecisionTreeClassifier, ExtraTreeClassifier
+
 from feature_engineering import tfIdf_parameteres, gen_or_load_feats, tfIdf_features, grammar_dependencies_count
 from utils.dataset import DataSet
 from utils.generate_test_splits import generate_splited_data_ids, kfold_split
 from utils.score import score_submission
+import time
 
 
 def stackFeatures(features):
@@ -81,7 +87,7 @@ if __name__ == "__main__":
 
     # Load the training dataset and generate folds
     dataSet = DataSet(name="fake_gold_real_articles")  # lire la dataset de TRAINING
-    training_ids, testing_ids = generate_splited_data_ids(dataSet, 0.8)
+    training_ids, testing_ids = generate_splited_data_ids(dataSet, 0.9)
 
     train_Headlines, train_bodies, train_labels = parseDataSet(training_ids, dataSet)
     test_Headlines, test_bodies, test_labels = parseDataSet(testing_ids, dataSet)
@@ -91,7 +97,7 @@ if __name__ == "__main__":
 
     folds_ids = kfold_split(training_ids, 10)
 
-    classifiers = [GradientBoostingClassifier()]
+    classifiers = [GradientBoostingClassifier(),SGDClassifier(),LinearSVC(),AdaBoostClassifier(),AdaBoostClassifier(),Perceptron(),RandomForestClassifier(),LogisticRegression(),BaggingClassifier(),KNeighborsClassifier(),BernoulliNB(),DecisionTreeClassifier(),ExtraTreeClassifier(),GaussianNB()]
 
     for clf in classifiers:
 
@@ -148,7 +154,10 @@ if __name__ == "__main__":
             index += 1
 
         print("Results for : " + str(type(clf).__name__))
+        start = time.time()
         holdout_predicted = [a for a in best_fold.predict(X_holdout)]
+        end = time.time()
+        diff = end - start
         holdout_actual = [a for a in y_holdout]
         holdout_score = score_submission(holdout_actual, holdout_predicted)
         holdout_max = score_submission(holdout_actual, holdout_actual)
@@ -156,4 +165,7 @@ if __name__ == "__main__":
         printConfusion(best_predicted, best_actual)
         print("classifier score on holdout : " + str(holdout_score / holdout_max))
         printConfusion(holdout_predicted, holdout_actual)
+        print("time took on prediction process for holdout : ")
+        print(str(diff))
+
         print("================================")
