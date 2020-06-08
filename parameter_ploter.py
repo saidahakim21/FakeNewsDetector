@@ -1,18 +1,14 @@
 #this is an adapted version of the master branch script for running the winning features on a set of classifiers
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier, AdaBoostClassifier, RandomForestClassifier, BaggingClassifier
-from sklearn.linear_model import Perceptron, LogisticRegression, SGDClassifier
+import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
-from sklearn.naive_bayes import BernoulliNB, GaussianNB
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import LinearSVC
-from sklearn.tree import DecisionTreeClassifier, ExtraTreeClassifier
+from matplotlib.legend_handler import HandlerLine2D
 
 from feature_engineering import tfIdf_parameteres, gen_or_load_feats, tfIdf_features, grammar_dependencies_count
 from utils.dataset import DataSet
 from utils.generate_test_splits import generate_splited_data_ids, kfold_split
 from utils.score import score_submission
-import time
 
 
 def stackFeatures(features):
@@ -97,13 +93,15 @@ if __name__ == "__main__":
 
     folds_ids = kfold_split(training_ids, 10)
 
-    classifiers = [GradientBoostingClassifier(),SGDClassifier(),LinearSVC(),AdaBoostClassifier(),AdaBoostClassifier(),Perceptron(),RandomForestClassifier(),LogisticRegression(),BaggingClassifier(),KNeighborsClassifier(),BernoulliNB(),DecisionTreeClassifier(),ExtraTreeClassifier(),GaussianNB()]
+    depths = [1, 2, 4, 8, 16, 32, 64]
+    best_fold_results = []
+    hold_out_results = []
 
-    for clf in classifiers:
-
+    for d in depths:
+        clf  = GradientBoostingClassifier(max_depth=d)
         Xs = dict()
         ys = dict()
-
+        print("max depth = "+ str(d))
         index = 0
         for fold_ids in folds_ids:
             fold_headlines, fold_bodies, fold_lables = parseDataSet(fold_ids, dataSet)
@@ -122,6 +120,9 @@ if __name__ == "__main__":
         best_fold = None
 
         for fold_ids in folds_ids:
+            if index != 1 :
+                index += 1
+                continue
             X_train = dict(Xs)
             del X_train[index]
             plat = [X_train[i] for i in X_train]
@@ -140,32 +141,31 @@ if __name__ == "__main__":
             predicted = [a for a in clf.predict(X_test)]
             actual = [a for a in y_test]
 
-            predicted_score = score_submission(actual, predicted)
+            predicted_fold_score = score_submission(actual, predicted)
             max_fold_score = score_submission(actual, actual)
+            fold_score = predicted_fold_score / max_fold_score
 
-            score = predicted_score / max_fold_score
-            print("score for fold " + str(index) + ": " + str(score))
-            if score > best_score:
-                best_score = score
+            print("fold score = "+str(fold_score))
+
+
+            if fold_score > best_score:
+                best_score = fold_score
                 best_fold = clf
                 best_predicted = predicted
                 best_actual = actual
-
             index += 1
 
-        print("Results for : " + str(type(clf).__name__))
-        start = time.time()
         holdout_predicted = [a for a in best_fold.predict(X_holdout)]
-        end = time.time()
-        diff = end - start
-        holdout_actual = [a for a in y_holdout]
-        holdout_score = score_submission(holdout_actual, holdout_predicted)
-        holdout_max = score_submission(holdout_actual, holdout_actual)
-        print("best fold score : " + str(best_score))
-        printConfusion(best_predicted, best_actual)
-        print("classifier score on holdout : " + str(holdout_score / holdout_max))
-        printConfusion(holdout_predicted, holdout_actual)
-        print("time took on prediction process for holdout : ")
-        print(str(diff))
+        holdout_actual = y_holdout
+        predicted_holdout_score = score_submission(y_holdout, holdout_predicted)
+        max_holdout_score = score_submission(holdout_actual, holdout_actual)
+        holdout_score = predicted_holdout_score / max_holdout_score
+        best_fold_results.append(best_score)
+        hold_out_results.append(holdout_score)
 
-        print("================================")
+    line1, = plt.plot(depths, best_fold_results, 'b', label="validation test")
+    line2, = plt.plot(depths, hold_out_results, 'r', label="holdout test")
+    plt.legend(handler_map={line1: HandlerLine2D(numpoints=2)})
+    plt.ylabel('score')
+    plt.xlabel('max_depth')
+    plt.show()
