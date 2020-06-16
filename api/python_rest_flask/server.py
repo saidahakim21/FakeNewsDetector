@@ -4,7 +4,9 @@ import pickle
 from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
 
-from feature_engineering import refuting_features, grammar_dependencies_count, tfIdf_features, stackFeatures
+from feature_engineering import  grammar_dependencies_count, tfIdf_features, stackFeatures
+from flask_cors import CORS
+
 
 app = Flask(__name__)
 api = Api(app) #Api initialization
@@ -21,6 +23,7 @@ bow_vectorizer =  pickle.load(bowFile)
 tfreq_vectorizer =  pickle.load(tfedFile)
 tfidf_vectorizer =  pickle.load(vecFile)
 
+cors = CORS(app, resources={r"/detector": {"origins": "*"}})
 
 # generate features for the entry text/body for the classificator
 def generateFeaturesForRequest(headline, body):
