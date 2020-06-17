@@ -4,6 +4,7 @@ import pickle
 from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
 
+from FakeIdentifier.triplets_extractor import analyse_text
 from feature_engineering import  grammar_dependencies_count, tfIdf_features, stackFeatures
 from flask_cors import CORS
 
@@ -37,7 +38,7 @@ def generateFeaturesForRequest(headline, body):
     X = stackFeatures(features)
     return X
 
-#api GET Method definition
+#api POST Method definition
 class FakeNewsDetector(Resource):
 
     def post(self):
@@ -49,7 +50,17 @@ class FakeNewsDetector(Resource):
         return {'result': str(result)}
 
 
+#api GET Method definition
+class FakeNewsIdentifier(Resource):
+
+    def get(self):
+        text = request.args['text']
+        return analyse_text(text)
+
+
+
 api.add_resource(FakeNewsDetector, '/detector')  # Route_1
+api.add_resource(FakeNewsIdentifier, '/identifier')  # Route_2
 
 if __name__ == '__main__':
     app.run()
