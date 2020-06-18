@@ -1,0 +1,309 @@
+.header{
+  background: #C89EB9; 
+  background: -webkit-linear-gradient(to left, #753a88, #C89EB9);
+  background: linear-gradient(to left, #753a88, #C89EB9);
+  /*height:90px;*/
+  /*justify-content: center;*/
+  /*justify-items: center;*/
+}
+
+.headerTitle{
+  font-size: 30px;
+  color: black;
+  font-weight: bolder;
+
+}
+
+.Link{
+  font-size: 16px;
+  color: black !important;
+  font-style: normal;
+  font-weight: bolder !important;
+    
+}
+
+.Link  a {
+  text-decoration: none !important;
+  color: bisque;
+}
+
+.aboutLayout{
+  height: 100%;
+  overflow: hidden !important;
+}
+
+.aboutLogo{
+  margin-top: 40px;
+}
+
+.descriptionBox {
+  /*background: #cc2b5e; 
+  background: -webkit-linear-gradient(to left, #753a88, #cc2b5e);
+  background: linear-gradient(to left, #753a88, #cc2b5e);*/
+  width: 60%;
+  /*background-color:rgba(0, 0, 0, 0.3);*/
+  /*margin-left: 180px;*/
+  border-radius: 10px;
+  margin-left: 20%;
+  margin-right: 20%;
+  align-items: center;
+  flex: auto;
+}
+
+
+.descriptionTitle{
+  font-size: 25px;
+  /*color: #C7C1C1;*/
+  color: black;
+  opacity: 1.0 !important;
+  margin-left:10px;
+  padding-top:15px;
+}
+.descriptionContent {
+  font-size: 16px;
+  /*color: #C7C1C1;*/
+  opacity: 1.0 !important;
+  padding-top:5px;
+  padding-bottom:50px;
+  margin-left: 15px;
+  margin-right: 10px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.start{
+  text-align : center;
+  padding-bottom: 10px;
+}
+.startIcon {
+  color:#9F6CA0;
+  padding-bottom: 10px;
+}
+
+.startText {
+  color:#9F6CA0;
+  padding-bottom: 30px;
+  font-size: 16px;
+  font-weight: bold;
+  text-decoration: none !important; 
+}
+
+
+
+
+.classificationForm {
+  /*text-align: center;*/
+  width: 90%;
+  position: relative;
+  margin-top: 80px;
+  margin-left:70px;
+  align-items: center;
+}
+
+.articleTitle{
+  padding-bottom: 20px;
+  border-color: black;
+  width: 100%;
+  font-weight: bolder;
+  font-size: 20px;
+  margin:auto;
+}
+
+.inputTitle{
+  border-color: linear-gradient(to left, #753a88, #C89EB9);
+  border-radius: 5px;
+}
+
+
+.articleContent{
+  padding-bottom: 20px;
+  border-color: black;
+  width: 100%;
+  font-weight: bolder;
+  font-size: 20px;
+  margin:auto;
+}
+
+
+.contentTextarea{
+  height: 200px;
+  max-height: 500px;
+}
+
+.classificationButton{
+  background-color: #9F6CA0 ;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  position: relative;
+  margin:auto;
+  margin-top: 20px;
+}
+
+
+.label{
+  text-align: center;
+  text-decoration: black;
+  font-style: italic;
+  font-weight: bolder;
+  font-size: 20px;
+  margin-bottom: 30px;
+}
+
+
+.icons{
+  text-align: center;
+  text-decoration: black;
+  font-style: italic;
+  font-size: 20px;
+  margin-bottom: 30px;
+}
+
+.modalContent{
+  margin-top: 5%;
+}
+
+.modalTitle{
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.error-message{
+  font-size: 12px;
+  margin-left: 5px;
+}
+
+
+.container {
+  height:90%;
+  width: 80%;
+  margin: 15px auto;
+  position: relative;
+  align-items: center;
+}
+.contact {
+  background: #eddfe8;
+  height: 90%;
+  width: 45%;
+  float: left;
+  margin: 10px;
+  margin-right: 50px;
+  margin-top: 50px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.github {
+  background: #eddfe8;
+  height: 90%;
+  width: 45%;
+  float: left;
+  margin-top: 50px;
+  border-radius: 8px;
+  align-items: center;
+  text-align: center;
+}
+
+.contactIcon{
+  margin: 10px;
+}
+
+.usersIcon{
+  color: #eddfe8;
+}
+
+.contactText{
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.membersInfo{
+  margin-top: 20px;
+}
+
+.membersText{
+  margin-top: 30px;
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+.member{
+  margin: 10px;
+  font-size: 16px;
+}
+
+.nameMember{
+  font-weight: bold;
+}
+
+
+
+.githubText{
+  margin-top: 30px;
+  margin-right: 20px;
+  margin-left: 20px;
+  margin-bottom: 50px;
+}
+
+.linkGithub{
+  font-weight: bold;
+  cursor: pointer;
+  outline: 0;
+  outline-color: none;
+}
+
+.description{
+  margin-bottom : 20px;
+}
+
+.main{
+  margin-left: 10%;
+  margin-right: 10%;
+  margin-top: 50px;
+}
+
+
+.inputSentence{
+  border-color: linear-gradient(to left, #753a88, #C89EB9);
+  border-radius: 5px;
+}
+
+.sentence{
+  padding-bottom: 20px;
+  border-color: black;
+  width: 100%;
+  font-weight: bolder;
+  font-size: 20px;
+  margin:auto;
+}
+
+
+.resultsBox{
+  margin: 20px;
+}
+
+.resultLabel{
+  font-size: 17px;
+}
+
+.resultValue{
+  font-size: 17px;
+  font-style: italic;
+  font-weight: bold;
+}
+
+
+.resultsDetails{
+  margin-top: 20px;
+  margin-left: 15px;
+  
+}
+
+.bold{
+  font-weight: bold;
+}
+
+
+
+
+
